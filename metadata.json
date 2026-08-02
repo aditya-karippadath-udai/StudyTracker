@@ -1,0 +1,6 @@
+{
+  "name": "StudyFlow",
+  "description": "Polished offline-first Android study planner & productivity app to manage subjects, chapters, daily schedules, Pomodoro focus sessions, exams, reminders, and streaks.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

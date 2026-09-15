@@ -27,5 +27,6 @@ data class ChapterEntity(
     val isCompleted: Boolean = false,
     val notes: String = "",
     val createdAt: Long = System.currentTimeMillis(),
-    val completedAt: Long? = null
+    val completedAt: Long? = null,
+    val deadlineEpochDay: Long? = null
 )

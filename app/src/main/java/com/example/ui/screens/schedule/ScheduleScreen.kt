@@ -116,9 +116,9 @@ fun ScheduleScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            if (uiState.daySessions.isEmpty()) {
+            if (uiState.daySessions.isEmpty() && uiState.dayTopicDeadlines.isEmpty()) {
                 EmptyState(
-                    title = "No Sessions Planned",
+                    title = "No Sessions or Topic Deadlines",
                     description = "Tap + to plan a study session for ${uiState.selectedDate.format(DateTimeFormatter.ofPattern("MMM d"))}.",
                     icon = Icons.Default.CalendarToday,
                     actionLabel = "Plan Session",
@@ -130,6 +130,82 @@ fun ScheduleScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier.weight(1f)
                 ) {
+                    if (uiState.dayTopicDeadlines.isNotEmpty()) {
+                        item {
+                            Text(
+                                text = "TOPIC DEADLINES TODAY",
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+
+                        items(uiState.dayTopicDeadlines) { item ->
+                            val subjectColor = parseHexColor(item.subject?.colorHex ?: "#2196F3")
+                            StudyFlowCard(
+                                modifier = Modifier.fillMaxWidth(),
+                                borderColor = subjectColor
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .clip(CircleShape)
+                                            .background(subjectColor.copy(alpha = 0.2f))
+                                            .padding(8.dp)
+                                    ) {
+                                        Text("📌")
+                                    }
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = item.subject?.name ?: "Subject",
+                                            style = MaterialTheme.typography.labelMedium,
+                                            fontWeight = FontWeight.Bold,
+                                            color = subjectColor
+                                        )
+                                        Text(
+                                            text = item.chapter.name,
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        Text(
+                                            text = "Study Deadline Today • ~${item.chapter.estimatedMinutes} mins",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                    IconButton(
+                                        onClick = { onNavigateToFocus(item.chapter.subjectId, item.chapter.id) },
+                                        modifier = Modifier
+                                            .clip(CircleShape)
+                                            .background(subjectColor.copy(alpha = 0.2f))
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.PlayArrow,
+                                            contentDescription = "Start Focus",
+                                            tint = subjectColor
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        if (uiState.daySessions.isNotEmpty()) {
+                            item {
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = "PLANNED SESSIONS",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+
                     items(uiState.daySessions) { session ->
                         val subject = uiState.subjects.find { it.id == session.subjectId }
                         val subjectColor = parseHexColor(subject?.colorHex ?: "#2196F3")

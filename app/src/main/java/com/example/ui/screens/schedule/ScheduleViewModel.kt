@@ -18,9 +18,15 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
+data class TopicDeadlineItem(
+    val chapter: ChapterEntity,
+    val subject: SubjectEntity?
+)
+
 data class ScheduleUiState(
     val selectedDate: LocalDate = LocalDate.now(),
     val daySessions: List<StudySessionEntity> = emptyList(),
+    val dayTopicDeadlines: List<TopicDeadlineItem> = emptyList(),
     val subjects: List<SubjectEntity> = emptyList(),
     val chapters: List<ChapterEntity> = emptyList(),
     val dayIndicators: Map<LocalDate, List<DayIndicator>> = emptyMap()
@@ -68,9 +74,24 @@ class ScheduleViewModel(private val repository: StudyRepository) : ViewModel() {
             }
         }
 
+        chapters.forEach { chapter ->
+            if (!chapter.isCompleted && chapter.deadlineEpochDay != null) {
+                val deadlineDate = LocalDate.ofEpochDay(chapter.deadlineEpochDay)
+                val list = indicatorsMap.getOrPut(deadlineDate) { mutableListOf() }
+                if (!list.contains(DayIndicator.PLANNED)) list.add(DayIndicator.PLANNED)
+            }
+        }
+
+        val dayTopicDeadlines = chapters.filter {
+            it.deadlineEpochDay == date.toEpochDay()
+        }.map { chapter ->
+            TopicDeadlineItem(chapter, subjects.find { it.id == chapter.subjectId })
+        }
+
         ScheduleUiState(
             selectedDate = date,
             daySessions = daySessions,
+            dayTopicDeadlines = dayTopicDeadlines,
             subjects = subjects,
             chapters = chapters,
             dayIndicators = indicatorsMap

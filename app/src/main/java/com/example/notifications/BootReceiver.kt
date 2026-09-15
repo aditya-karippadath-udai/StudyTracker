@@ -48,6 +48,33 @@ class BootReceiver : BroadcastReceiver() {
                         )
                     }
                 }
+
+                // Reschedule upcoming topic deadline alarms
+                val chapters = dao.getAllChapters().first()
+                for (chapter in chapters) {
+                    if (!chapter.isCompleted && chapter.deadlineEpochDay != null) {
+                        val deadlineDate = LocalDate.ofEpochDay(chapter.deadlineEpochDay)
+                        if (!deadlineDate.isBefore(LocalDate.now())) {
+                            val subject = dao.getSubjectByIdSync(chapter.subjectId)
+                            val subjectName = subject?.name ?: "Subject"
+                            var triggerAtMillis = deadlineDate.atTime(9, 0)
+                                .atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+                            if (deadlineDate == LocalDate.now() && triggerAtMillis <= System.currentTimeMillis()) {
+                                triggerAtMillis = System.currentTimeMillis() + 5000
+                            }
+                            if (triggerAtMillis > System.currentTimeMillis()) {
+                                AlarmScheduler.scheduleExactAlarm(
+                                    context = context,
+                                    triggerAtMillis = triggerAtMillis,
+                                    notificationId = (200000 + chapter.id).toInt(),
+                                    title = "📌 Topic Deadline Today!",
+                                    message = "Deadline for topic '${chapter.name}' in $subjectName is today!",
+                                    channelId = NotificationHelper.CHANNEL_STUDY_REMINDERS
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
     }

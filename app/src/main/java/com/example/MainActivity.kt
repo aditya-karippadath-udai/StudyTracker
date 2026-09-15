@@ -40,7 +40,7 @@ class MainActivity : ComponentActivity() {
 
         val homeViewModel = HomeViewModel(app.studyRepository, app.userPreferencesRepository)
         val scheduleViewModel = ScheduleViewModel(app.studyRepository)
-        val subjectsViewModel = SubjectsViewModel(app.studyRepository)
+        val subjectsViewModel = SubjectsViewModel(app.studyRepository, app)
         val focusViewModel = FocusViewModel(app.pomodoroTimerManager, app.studyRepository, app.userPreferencesRepository)
         val progressViewModel = ProgressViewModel(app.studyRepository, app.userPreferencesRepository)
         val examsViewModel = ExamsViewModel(app.studyRepository)
